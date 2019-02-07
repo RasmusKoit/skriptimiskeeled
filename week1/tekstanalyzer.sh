@@ -3,6 +3,7 @@
 # Vahetada välja bataka tekstid
 # Lisada juurde iga päeva kohta 0 info, kui sündmust pole
 # Näidata kui pikalt sündmus maas oli
+# Teen asju
 
 sed -i '/apcupsd/d' ./tekst.txt
 sed -i '/battery/d' ./tekst.txt
