@@ -2,9 +2,6 @@
 
 IFS=$'\n'
 
-# Vahetada välja bataka tekstid
-# Lisada juurde iga päeva kohta 0 info, kui sündmust pole
-# Näidata kui pikalt sündmus maas oli
 
 sed -i '/apcupsd/d' ./tekst.txt
 sed -i '/battery/d' ./tekst.txt
@@ -16,15 +13,18 @@ sed -i 's/Power failure./failure/g' ./tekst.txt
 sed -i 's/Power is back. UPS running on mains./restored/g' ./tekst.txt
 
 
-for i in $(cat tekst.txt); do
+for i in $(cat ./tekst.txt); do
         #echo 'sdad'
         #echo $i | awk '{print $4}'
-        if [[ "$(echo $i | awk '{print $4}')" == "failure" && "$failed" != 'true' ]]; then
+	status=$(echo $i | awk '{print $4}')
+
+        if [[ "$status" == *"failure"* && "$failed" != 'true' ]]; then
                 failuretime="$(echo $i | awk '{print $2}')"
                 failed=true
-        fi
+	fi
 
-        if [[ "$(echo $i | awk '{print $4}')" == 'restored' ]]; then
+        if [[ "$status" == *"restored"* ]]; then
+                echo "$(echo $i | awk '{print $1}')"
                 echo -n "$failuretime "
                 #echo "$(echo $i | awk '{print $4}')"
                 restoretime="$(echo $i | awk '{print $2}')"
@@ -39,6 +39,9 @@ for i in $(cat tekst.txt); do
                 echo "$seconds until restore was established"
 
 
+		printf ""
+
+
 
 
                 IFS=$'\n'
@@ -48,3 +51,5 @@ for i in $(cat tekst.txt); do
                 unset hours minutes seconds
         fi
 done
+
+
