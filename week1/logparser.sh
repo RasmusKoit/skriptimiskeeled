@@ -14,6 +14,17 @@ sed -i 's/Power is back. UPS running on mains./restored/g' ./tekst.txt
 
 rm -f parsedFile.txt
 rm -f rrdtool.txt
+
+if [ ! -f ./rrdtoolbase.rrd ]; then
+	rrdtool create rrdtoolbase.rrd \
+	--start 1520953961 \
+	--step 600 \
+	DS:started:GAUGE:900:1:9999999 \
+	DS:lasted:GAUGE:900:1:9999999 \
+	RRA:MAX:0.5:1:27260
+fi
+
+
 for i in $(cat ./tekst.txt); do
     status=$(echo $i | awk '{print $4}')
     
@@ -63,7 +74,9 @@ for i in $(cat ./tekst.txt); do
         epochLength=`echo "$epochRestore - $epochFailure" | bc`
         printf "%s %s %s - %s was a failure which lasted for %02d:%02d:%02d\n" "$restoredate" "$failuretime" "$savingmode" "$restoretime" "$hours" "$minutes" "$seconds" >> ./parsedFile.txt
         printf "%d:%d\n" "$epochFailure" "$epochLength" >> ./rrdtool.txt
-        
+
+	# rrdtool update rrdtoolbase.rrd --template ts:lasted $epochFailure:$epochLength:
+	rrdtool update rrdtoolbase.rrd $epochFailure:$epochFailure:$epochLength
         
         
         IFS=$'\n'
@@ -74,5 +87,22 @@ for i in $(cat ./tekst.txt); do
     fi
 done
 
-
+rrdtool graph latency_graph.png \
+-w 785 -h 120 -a PNG \
+--slope-mode \
+--start -86400 --end now \
+--font DEFAULT:7: \
+--title "ping default gateway" \
+--watermark "`date`" \
+--vertical-label "latency(ms)" \
+--right-axis-label "latency(ms)" \
+--lower-limit 0 \
+--right-axis 1:0 \
+--x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
+--alt-y-grid --rigid \
+DEF:started=rrdtoolbase.rrd:started:MAX \
+DEF:lasted=rrdtoolbase.rrd:lasted:MAX \
+LINE1:lasted#0000FF:"lasted(epoch s)" \
+	
+# Update data set
 
