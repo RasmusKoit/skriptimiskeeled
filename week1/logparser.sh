@@ -144,6 +144,6 @@ rrdtool graph powerfails_1y.png \
 DEF:powerfail=apcupsd.rrd:powerfail:MAX \
 LINE1:powerfail#0000FF:"Powerfails (s)" \
 
-echo "mida "
+echo "mida mis ending on?"
 
 
