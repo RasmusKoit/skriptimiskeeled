@@ -121,27 +121,29 @@ function fillGap() {
    fi
 }
 
-#fillGap 1533729713 1533732623 300 2910
+fillGap 1533729713 1533732623 300 2910
 
 
-#for i in $(cat ./rrdtool.txt); do
-#rrdtool update apcupsd.rrd -t powerfail $i
-#done;
+for i in $(cat ./rrdtool.txt); do
+    rrdtool update apcupsd.rrd -t powerfail $i
+done
 
 
-#rrdtool graph powerfails_1y.png \
-#-w 1080 -h 768 -a PNG \
-#--slope-mode \
-#--start now-1y --end now \
-#--font DEFAULT:7: \
-#--title "Powerfails 1 year" \
-#--watermark "`date`" \
-#--vertical-label "failure (s)" \
-#--lower-limit 0 \
-#--x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
-#--alt-y-grid --rigid \
-#--lower-limit 0.5 -o \
-#DEF:powerfail=apcupsd.rrd:powerfail:MAX \
-#LINE1:powerfail#0000FF:"Powerfails (s)" \
+rrdtool graph powerfails_1y.png \
+-w 1080 -h 768 -a PNG \
+--slope-mode \
+--start now-1y --end now \
+--font DEFAULT:7: \
+--title "Powerfails 1 year" \
+--watermark "`date`" \
+--vertical-label "failure (s)" \
+--lower-limit 0 \
+--x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
+--alt-y-grid --rigid \
+--lower-limit 0.5 -o \
+DEF:powerfail=apcupsd.rrd:powerfail:MAX \
+LINE1:powerfail#0000FF:"Powerfails (s)" \
 
 echo "mida "
+
+
