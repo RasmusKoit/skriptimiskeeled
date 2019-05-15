@@ -117,12 +117,12 @@ function fillGap() {
 	echo ${a}:$4;
 
 	for ((a=$1 + $3; $a < $2; a = $a + $3 )); do
-	   rrdtool update apcupsd.rrd -t powerfail ${a}:$4
+	   echo ${a}:$4 >> rrdtool.txt
    	done
    fi
 }
 
-fillGap 1533729713 1533732623 300 2910
+fillGap 1533729713 1533732623 200 2910
 
 
 for i in $(cat ./rrdtool.txt); do
