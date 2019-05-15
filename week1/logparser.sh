@@ -22,11 +22,12 @@ if [ ! -f ./apcupsd.rrd ]; then
 #	DS:started:GAUGE:900:1:9999999 \
 #	DS:lasted:GAUGE:900:1:9999999 \
 #	RRA:MAX:0.5:1:27260
-rrdtool create apcupsd.rrd \
---step 300 \
---start 1520953961  \
-DS:powerfail:GAUGE:600:0:U \
-RRA:MAX:0.5:1:104000 \
+	rrdtool create apcupsd.rrd \
+	--step 300 \
+	--start 1520953961  \
+	DS:powerfail:GAUGE:600:0:U \
+	RRA:MAX:0.5:1:104000 \
+
 fi
 
 
