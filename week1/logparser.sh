@@ -16,12 +16,17 @@ rm -f parsedFile.txt
 rm -f rrdtool.txt
 
 if [ ! -f ./rrdtoolbase.rrd ]; then
-	rrdtool create rrdtoolbase.rrd \
-	--start 1520953961 \
-	--step 600 \
-	DS:started:GAUGE:900:1:9999999 \
-	DS:lasted:GAUGE:900:1:9999999 \
-	RRA:MAX:0.5:1:27260
+#	rrdtool create rrdtoolbase.rrd \
+#	--start 1520953961 \
+#	--step 600 \
+#	DS:started:GAUGE:900:1:9999999 \
+#	DS:lasted:GAUGE:900:1:9999999 \
+#	RRA:MAX:0.5:1:27260
+rrdtool create apcupsd.rrd \
+--step 300 \
+--start 1520953961  \
+DS:powerfail:GAUGE:600:0:U \
+RRA:MAX:0.5:1:104000 \
 fi
 
 
@@ -76,7 +81,7 @@ for i in $(cat ./tekst.txt); do
         printf "%d:%d\n" "$epochFailure" "$epochLength" >> ./rrdtool.txt
 
 	# rrdtool update rrdtoolbase.rrd --template ts:lasted $epochFailure:$epochLength:
-	rrdtool update rrdtoolbase.rrd $epochFailure:$epochFailure:$epochLength
+#	rrdtool update rrdtoolbase.rrd $epochFailure:$epochFailure:$epochLength
         
         
         IFS=$'\n'
@@ -87,22 +92,56 @@ for i in $(cat ./tekst.txt); do
     fi
 done
 
-rrdtool graph latency_graph.png \
--w 785 -h 120 -a PNG \
---slope-mode \
---start -86400 --end now \
---font DEFAULT:7: \
---title "ping default gateway" \
---watermark "`date`" \
---vertical-label "latency(ms)" \
---right-axis-label "latency(ms)" \
---lower-limit 0 \
---right-axis 1:0 \
---x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
---alt-y-grid --rigid \
-DEF:started=rrdtoolbase.rrd:started:MAX \
-DEF:lasted=rrdtoolbase.rrd:lasted:MAX \
-LINE1:lasted#0000FF:"lasted(epoch s)" \
+#rrdtool graph latency_graph.png \
+#-w 785 -h 120 -a PNG \
+#--slope-mode \
+#--start -86400 --end now \
+#--font DEFAULT:7: \
+#--title "ping default gateway" \
+#--watermark "`date`" \
+#--vertical-label "latency(ms)" \
+#--right-axis-label "latency(ms)" \
+#--lower-limit 0 \
+#--right-axis 1:0 \
+#--x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
+#--alt-y-grid --rigid \
+#DEF:started=rrdtoolbase.rrd:started:MAX \
+#DEF:lasted=rrdtoolbase.rrd:lasted:MAX \
+#LINE1:lasted#0000FF:"lasted(epoch s)" \
 	
 # Update data set
+echo "siin olen"
+function fillGap() {
+   if [[ $1 -le $2 && $3 > 0 && $4 -ge 0 ]]; then
+	echo ${a}:$4;
 
+	for ((a=$1 + $3; $a < $2; a = $a + $3 )); do
+	   rrdtool update apcupsd.rrd -t powerfail ${a}:$4
+   	done
+   fi
+}
+
+fillGap 1533729713 1533732623 300 2910
+
+
+for i in $(cat ./rrdtool.txt); do
+	rrdtool update apcupsd.rrd -t powerfail $i
+done
+
+
+/usr/bin/rrdtool graph powerfails_1y.png \
+-w 1080 -h 768 -a PNG \
+--slope-mode \
+--start now-1y --end now \
+--font DEFAULT:7: \
+--title "Powerfails 1 year" \
+--watermark "`date`" \
+--vertical-label "failure (s)" \
+--lower-limit 0 \
+--x-grid MINUTE:10:HOUR:1:MINUTE:120:0:%R \
+--alt-y-grid --rigid \
+--lower-limit 0.5 -o \
+DEF:powerfail=apcupsd.rrd:powerfail:MAX \
+LINE1:powerfail#0000FF:"Powerfails (s)" 
+
+echo "mida"
