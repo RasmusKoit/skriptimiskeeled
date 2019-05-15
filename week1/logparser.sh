@@ -144,4 +144,4 @@ done
 DEF:powerfail=apcupsd.rrd:powerfail:MAX \
 LINE1:powerfail#0000FF:"Powerfails (s)" 
 
-echo "mida"
+echo "mida "
